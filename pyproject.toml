@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "pybrtools"
+version = "0.1.0"
+description = ""
+authors = ["Marco Rougeth <rougeth@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+pybrtools = "pybrtools.cli:cli"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+boto3 = "^1.28.85"
+click = "^8.1.7"
+loguru = "^0.7.2"
+pydantic = "^2.5.0"
+
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.17.2"
+ipdb = "^0.13.13"
+black = "^23.11.0"
+isort = "^5.12.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
