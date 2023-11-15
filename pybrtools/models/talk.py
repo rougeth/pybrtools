@@ -31,7 +31,7 @@ class Talk(BaseModel):
 
 def read_from_csv(
     file: Path,
-) -> list[Talk]:
+) -> tuple[list[Talk], list]:
     errors = []
     talks = []
     with file.open() as fp:
