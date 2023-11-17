@@ -15,6 +15,8 @@ from rich.console import Console
 
 from pybrtools.models.talk import Talk
 
+from .config import DownloadStageConfig
+
 
 console = Console()
 
@@ -41,30 +43,33 @@ def should_download_next(output: Path, limit=3) -> bool:
 def download_talk(talk, bucket, output) -> bool:
     s3 = boto3.client("s3")
     path = output / talk.source_filename
-    with path.open(mode="wb") as file:
-        try:
-            s3.download_fileobj(bucket, talk.source_filename, file)
-            return True
-        except ClientError as e:
-            error = e.response["Error"]["Message"]
-            console.log(
-                f"Failed to download file. bucket={bucket!r}, file={talk.source_filename!r}, error={error!r}"
-            )
-            path.unlink()
-            return False
-
-
-def step_download(talks: list[Talk], status_file: Path, output: Path, bucket: str):
-    talks_downloaded = check_talks_downloaded(status_file)
-    if talks_downloaded:
+    try:
+        s3.download_file(bucket, talk.source_filename, path)
+        return True
+    except ClientError as e:
+        error = e.response["Error"]["Message"]
         console.log(
-            f"{len(talks_downloaded)} talks already downloaded. status={status_file}"
+            f"Failed to download file. bucket={bucket!r}, file={talk.source_filename!r}, error={error!r}"
         )
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+        return False
+
+
+def step_download(config: DownloadStageConfig, talks: list[Talk]):
+    if not config.output.exists():
+        config.output.mkdir()
+
+    talks_downloaded = check_talks_downloaded(config.tracking_file)
+    if talks_downloaded:
+        console.log(f"{len(talks_downloaded)} talks already downloaded")
 
     with console.status("[bold blue] Downloading talks") as log:
         while talks:
             log.update("[bold yellow] Waiting next steps")
-            while not should_download_next(output):
+            while not should_download_next(config.output):
                 sleep(1)
 
             next_talk = talks.pop()
@@ -72,7 +77,9 @@ def step_download(talks: list[Talk], status_file: Path, output: Path, bucket: st
                 continue
 
             log.update(f"[bold blue] Downloading: {next_talk.source_filename}")
-            if download_talk(next_talk, bucket, output):
+            if download_talk(next_talk, config.bucket, config.output):
                 talks_downloaded.append(next_talk.source_filename)
-                update_status(talks_downloaded, status_file)
-                console.log(f"File downloaded: {output / next_talk.source_filename}")
+                update_status(talks_downloaded, config.tracking_file)
+                console.log(
+                    f"File downloaded: {config.output / next_talk.source_filename}"
+                )
