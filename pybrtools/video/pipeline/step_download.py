@@ -17,7 +17,6 @@ from pybrtools.models.talk import Talk
 
 from .config import DownloadStageConfig
 
-
 console = Console()
 
 

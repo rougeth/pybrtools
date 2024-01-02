@@ -20,9 +20,10 @@ class DownloadStageConfig(BaseModel):
 class CutStageConfig(VideoProcessingConfig):
     ...
 
+
 class JoinStageConfig(VideoProcessingConfig):
-    prefixes: list[Path]
-    suffixes: list[Path]
+    prefix: Path
+
 
 class StagesConfig(BaseModel):
     download: Optional[DownloadStageConfig] = None

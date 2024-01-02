@@ -1,12 +1,12 @@
-import tomllib
-from pathlib import Path
-
 import click
 
-from .pipeline.config import PipelineConfig
-from .pipeline.step_download import step_download
-from .pipeline.step_process import execute_step, step_cut# , step_join
 from pybrtools.models.talk import read_from_csv
+
+from .pipeline.config import PipelineConfig
+from .pipeline.step_cut import step_cut
+from .pipeline.step_download import step_download
+from .pipeline.step_join import step_join
+from .pipeline.step_process import execute_step
 
 
 @click.group(name="video")
@@ -38,7 +38,6 @@ def pipeline_cut(config):
     execute_step(pipeline_config.stages.cut, talks, step_cut)
 
 
-"""
 @video_cli.command("pipeline:join")
 @click.argument("config", type=click.File())
 def pipeline_join(config):
@@ -48,5 +47,4 @@ def pipeline_join(config):
         raise click.exceptions.Exit(2)
 
     talks, _ = read_from_csv(pipeline_config.data)
-    execute_step(pipeline_config.stages.download, talks, step_join)
-"""
+    execute_step(pipeline_config.stages.join, talks, step_join)

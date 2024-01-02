@@ -1,11 +1,10 @@
-from datetime import date
 from csv import DictReader
+from datetime import date
 from pathlib import Path
 
+from click import File
 from loguru import logger
 from pydantic import BaseModel, ValidationError
-from click import File
-
 
 YOUTUBE_TITLE_MAX_LENGTH = 60
 
